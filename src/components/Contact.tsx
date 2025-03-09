@@ -1,43 +1,62 @@
-import React from 'react';
-import { Mail, Send, Loader2, MessageSquare, Instagram } from 'lucide-react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import toast from 'react-hot-toast';
+import React, { useState } from 'react';
+import { Mail, Send, MessageSquare, Instagram } from 'lucide-react';
+import toast, { Toaster } from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import PageLayout from './layout/PageLayout';
-import { useLocation } from 'react-router-dom';
 
-const contactSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Please enter a valid email'),
-  subject: z.string().min(5, 'Subject must be at least 5 characters'),
-  message: z.string().min(10, 'Message must be at least 10 characters'),
-});
-
-type ContactFormData = z.infer<typeof contactSchema>;
+interface FormData {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}
 
 const Contact = () => {
-  const location = useLocation();
-  const isHomePage = location.pathname === '/';
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors, isSubmitting },
-  } = useForm<ContactFormData>({
-    resolver: zodResolver(contactSchema),
+  const [formData, setFormData] = useState<FormData>({
+    name: '',
+    email: '',
+    subject: '',
+    message: ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const onSubmit = async (data: ContactFormData) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      console.log('Form data:', data);
-      toast.success('Message sent successfully!');
-      reset();
+      const response = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          access_key: 'f5af0961-3131-4613-b30e-ba1e8cf7da1e',
+          ...formData
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success('Message sent successfully!');
+        setFormData({ name: '', email: '', subject: '', message: '' });
+      } else {
+        throw new Error('Failed to send message');
+      }
     } catch (error) {
       toast.error('Failed to send message. Please try again.');
+      console.error('Error sending message:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -60,7 +79,8 @@ const Contact = () => {
 
   return (
     <PageLayout>
-      <section className={`py-16 bg-white dark:bg-dark-primary ${isHomePage ? '-mt-16' : ''}`} id="contact">
+      <section className="py-16 bg-saasha-cream dark:bg-dark-primary" id="contact">
+        <Toaster position="top-center" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial="hidden"
@@ -147,7 +167,7 @@ const Contact = () => {
               variants={itemVariants}
               className="bg-white dark:bg-dark-secondary rounded-2xl shadow-xl p-8 border border-saasha-cream dark:border-dark-border"
             >
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-saasha-brown dark:text-dark-text mb-2">
                     Full Name
@@ -155,15 +175,13 @@ const Contact = () => {
                   <input
                     type="text"
                     id="name"
-                    {...register('name')}
-                    className={`w-full px-4 py-3 rounded-lg border ${
-                      errors.name ? 'border-red-500' : 'border-saasha-cream dark:border-dark-border'
-                    } focus:outline-none focus:ring-2 focus:ring-saasha-rose/20 dark:bg-dark-secondary dark:text-dark-text`}
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-3 rounded-lg border border-saasha-cream dark:border-dark-border focus:outline-none focus:ring-2 focus:ring-saasha-rose/20 dark:bg-dark-secondary dark:text-dark-text"
                     placeholder="John Doe"
                   />
-                  {errors.name && (
-                    <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>
-                  )}
                 </div>
 
                 <div>
@@ -173,15 +191,13 @@ const Contact = () => {
                   <input
                     type="email"
                     id="email"
-                    {...register('email')}
-                    className={`w-full px-4 py-3 rounded-lg border ${
-                      errors.email ? 'border-red-500' : 'border-saasha-cream dark:border-dark-border'
-                    } focus:outline-none focus:ring-2 focus:ring-saasha-rose/20 dark:bg-dark-secondary dark:text-dark-text`}
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-3 rounded-lg border border-saasha-cream dark:border-dark-border focus:outline-none focus:ring-2 focus:ring-saasha-rose/20 dark:bg-dark-secondary dark:text-dark-text"
                     placeholder="john@example.com"
                   />
-                  {errors.email && (
-                    <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>
-                  )}
                 </div>
 
                 <div>
@@ -191,15 +207,13 @@ const Contact = () => {
                   <input
                     type="text"
                     id="subject"
-                    {...register('subject')}
-                    className={`w-full px-4 py-3 rounded-lg border ${
-                      errors.subject ? 'border-red-500' : 'border-saasha-cream dark:border-dark-border'
-                    } focus:outline-none focus:ring-2 focus:ring-saasha-rose/20 dark:bg-dark-secondary dark:text-dark-text`}
+                    name="subject"
+                    value={formData.subject}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-3 rounded-lg border border-saasha-cream dark:border-dark-border focus:outline-none focus:ring-2 focus:ring-saasha-rose/20 dark:bg-dark-secondary dark:text-dark-text"
                     placeholder="How can we help?"
                   />
-                  {errors.subject && (
-                    <p className="mt-1 text-sm text-red-500">{errors.subject.message}</p>
-                  )}
                 </div>
 
                 <div>
@@ -208,16 +222,14 @@ const Contact = () => {
                   </label>
                   <textarea
                     id="message"
-                    {...register('message')}
+                    name="message"
+                    value={formData.message}
+                    onChange={handleChange}
+                    required
                     rows={4}
-                    className={`w-full px-4 py-3 rounded-lg border ${
-                      errors.message ? 'border-red-500' : 'border-saasha-cream dark:border-dark-border'
-                    } focus:outline-none focus:ring-2 focus:ring-saasha-rose/20 dark:bg-dark-secondary dark:text-dark-text`}
+                    className="w-full px-4 py-3 rounded-lg border border-saasha-cream dark:border-dark-border focus:outline-none focus:ring-2 focus:ring-saasha-rose/20 dark:bg-dark-secondary dark:text-dark-text"
                     placeholder="Your message here..."
                   />
-                  {errors.message && (
-                    <p className="mt-1 text-sm text-red-500">{errors.message.message}</p>
-                  )}
                 </div>
 
                 <button
@@ -227,7 +239,7 @@ const Contact = () => {
                 >
                   {isSubmitting ? (
                     <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <Send className="w-5 h-5 animate-spin" />
                       <span>Sending...</span>
                     </>
                   ) : (

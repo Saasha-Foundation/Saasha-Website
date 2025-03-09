@@ -1,2 +1,3 @@
 node_modules
 supabase/migrations/20250308_create_faqs_table.sql
+src/components/legacy_contact.tsx
