@@ -192,12 +192,12 @@ const Contact = () => {
                   <div>
                     <h3 className="text-xl font-semibold text-saasha-brown dark:text-dark-text mb-1">Follow Us</h3>
                     <a 
-                      href="https://www.instagram.com/saasha_foundation?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" 
+                      href="https://www.instagram.com/saasha_foundation" 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="text-saasha-brown/80 dark:text-dark-text/80 hover:text-saasha-rose dark:hover:text-dark-accent transition-colors duration-300"
                     >
-                      @saasha
+                      @saasha_foundation
                     </a>
                     <p className="text-sm text-saasha-brown/60 dark:text-dark-text/60 mt-1">Stay updated with our latest events</p>
                   </div>
