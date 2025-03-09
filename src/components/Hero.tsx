@@ -20,6 +20,7 @@ const Hero = () => {
           <p className="mt-3 max-w-md mx-auto text-base text-saasha-brown/80 dark:text-dark-text/80 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
             Together, we can create lasting change in our communities. Join us in our mission to build a better future for everyone.
           </p>
+          <div className="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
             <div className="mt-3 rounded-md shadow sm:mt-0 sm:ml-3">
               <Link to="/volunteer" className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-saasha-brown dark:text-dark-text bg-white dark:bg-dark-secondary hover:bg-saasha-cream dark:hover:bg-dark-accent/20 transition-colors duration-300 md:py-4 md:text-lg md:px-10">
                 Volunteer
@@ -28,6 +29,7 @@ const Hero = () => {
           </div>
         </div>
       </div>
+    </div>
   );
 };
 
