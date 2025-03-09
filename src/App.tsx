@@ -40,11 +40,11 @@ const MainApp = () => {
 
   useEffect(() => {
     // Check if user already has access
-    const storedAccess = localStorage.getItem('hasAccess');
+    const storedAccess = localStorage.getItem('hasDevAccess');
     
-    // If ?admin is in URL, grant access
-    if (location.search.includes('?admin')) {
-      localStorage.setItem('hasAccess', 'true');
+    // If ?developer is in URL, grant access
+    if (location.search.includes('?dev')) {
+      localStorage.setItem('hasDevAccess', 'true');
       setHasAccess(true);
     } 
     // If access was previously granted, maintain it
