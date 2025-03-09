@@ -9,18 +9,18 @@ const Team = () => {
   const [direction, setDirection] = useState(0);
 
   const teamMembers = [
-    { id: 1, name: 'Sanya', role: 'Co-Founder', imageUrl: 'https://drive.google.com/uc?export=view&id=1cKOWiuaAgJT4BEr2Yog2eOaqpeZJtrP1' },
-    { id: 2, name: 'Tanisha', role: 'Co-Founder', imageUrl: 'https://drive.google.com/uc?export=view&id=1TeKVHE30kbMU8bAaV-rbB5ZVgWb3sx4e' },
-    { id: 3, name: 'Aarya', role: 'Social Media Manager', imageUrl: 'https://drive.google.com/uc?export=view&id=1MKxdycUgLc-Y_DqF5epXqxi3HSVaWF4e' },
-    { id: 4, name: 'Arnav', role: 'Lead Designer', imageUrl: 'https://drive.google.com/uc?export=view&id=1MFjO6VzD15sU43qHdYjLchANKG_iL88g' },
-    { id: 5, name: 'Akshat', role: 'Designer', imageUrl: 'https://drive.google.com/uc?export=view&id=1Cgy1NlRkH0yWAWboRHPdE9K2HazgN-CZ' },
-    { id: 6, name: 'Samisha', role: 'Creative Strategist', imageUrl: 'https://drive.google.com/uc?export=view&id=1kP0OiBUNRHFHcfeXaCUfZmkSrNB8znND' },
-    { id: 7, name: 'Krishnna', role: 'Creative Strategist', imageUrl: 'https://drive.google.com/uc?export=view&id=1_w8B-nnIs3eif15J_jWsZeH04Afd3iDy' },
-    { id: 8, name: 'Yessa', role: 'Content Writer', imageUrl: 'https://drive.google.com/uc?export=view&id=1err3ds2TWC8rKi0FJNsn184rwoDkxyGK' },
-    { id: 9, name: 'Prishita', role: 'Content Writer', imageUrl: 'https://drive.google.com/uc?export=view&id=15e3rz0O0AFIBvkZ-fpR9nGUGxZuFfIOn' },
-    { id: 10, name: 'Nihar', role: 'Event Manager', imageUrl: 'https://drive.google.com/uc?export=view&id=16nV9TJr7eq5WcYx2AvuGrRw5ZgNCfIP6' },
-    { id: 11, name: 'Meira', role: 'Photographer', imageUrl: 'https://drive.google.com/uc?export=view&id=1zJ5XH3JBA9jGYi4DcXDvsYeVTgoZ5GkG' },
-    { id: 12, name: 'Anushka', role: 'Head of Content Creation', imageUrl: 'https://drive.google.com/uc?export=view&id=1Ngf6nJoODUztS0xlU6pY7FucTc37XCrf' }
+    { id: 1, name: 'Sanya', role: 'Co-Founder', imageUrl: 'https://i.imgur.com/cUokxUE.jpeg' },
+    { id: 2, name: 'Tanisha', role: 'Co-Founder', imageUrl: 'https://i.imgur.com/VfUhwwo.jpeg' },
+    { id: 3, name: 'Aarya', role: 'Social Media Manager', imageUrl: 'https://i.imgur.com/RtKs0d5.jpeg' },
+    { id: 4, name: 'Arnav', role: 'Lead Designer', imageUrl: 'https://i.imgur.com/Cae5gD4.jpeg' },
+    { id: 5, name: 'Akshat', role: 'Designer', imageUrl: 'https://i.imgur.com/HA6Fs1M.jpeg' },
+    { id: 6, name: 'Samisha', role: 'Creative Strategist', imageUrl: 'https://i.imgur.com/zUPEhLp.jpeg' },
+    { id: 7, name: 'Krishnna', role: 'Creative Strategist', imageUrl: 'https://i.imgur.com/jnB7vm9.jpeg' },
+    { id: 8, name: 'Yessa', role: 'Content Writer', imageUrl: 'https://i.imgur.com/L2OubBk.jpeg' },
+    { id: 9, name: 'Prishita', role: 'Content Writer', imageUrl: 'https://i.imgur.com/lEnSCur.jpeg' },
+    { id: 10, name: 'Nihar', role: 'Event Manager', imageUrl: 'https://i.imgur.com/HOysoez.jpeg' },
+    { id: 11, name: 'Meira', role: 'Photographer', imageUrl: 'https://i.imgur.com/mxffnJo.jpeg' },
+    { id: 12, name: 'Anushka', role: 'Head of Content Creation', imageUrl: 'https://i.imgur.com/YHYITC3.jpeg' }
   ];
 
   const itemsPerPage = {
