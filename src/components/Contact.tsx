@@ -11,6 +11,13 @@ interface FormData {
   message: string;
 }
 
+interface FormErrors {
+  name?: string;
+  email?: string;
+  subject?: string;
+  message?: string;
+}
+
 const Contact = () => {
   const [formData, setFormData] = useState<FormData>({
     name: '',
@@ -18,7 +25,32 @@ const Contact = () => {
     subject: '',
     message: ''
   });
+  const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {};
+
+    if (formData.name.length < 2) {
+      newErrors.name = 'Name must be at least 2 characters';
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      newErrors.email = 'Please enter a valid email';
+    }
+
+    if (formData.subject.length < 5) {
+      newErrors.subject = 'Subject must be at least 5 characters';
+    }
+
+    if (formData.message.length < 10) {
+      newErrors.message = 'Message must be at least 10 characters';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -26,10 +58,22 @@ const Contact = () => {
       ...prev,
       [name]: value
     }));
+    // Clear error when user starts typing
+    if (errors[name as keyof FormErrors]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: undefined
+      }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -79,7 +123,7 @@ const Contact = () => {
 
   return (
     <PageLayout>
-      <section className="py-16 bg-saasha-cream dark:bg-dark-primary" id="contact">
+      <section className="py-4 bg-saasha-cream dark:bg-dark-primary" id="contact">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial="hidden"
@@ -177,10 +221,14 @@ const Contact = () => {
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
-                    required
-                    className="w-full px-4 py-3 rounded-lg border border-saasha-cream dark:border-dark-border focus:outline-none focus:ring-2 focus:ring-saasha-rose/20 dark:bg-dark-secondary dark:text-dark-text"
+                    className={`w-full px-4 py-3 rounded-lg border ${
+                      errors.name ? 'border-red-500' : 'border-saasha-cream dark:border-dark-border'
+                    } focus:outline-none focus:ring-2 focus:ring-saasha-rose/20 dark:bg-dark-secondary dark:text-dark-text`}
                     placeholder="John Doe"
                   />
+                  {errors.name && (
+                    <p className="mt-1 text-sm text-red-500">{errors.name}</p>
+                  )}
                 </div>
 
                 <div>
@@ -193,10 +241,14 @@ const Contact = () => {
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    required
-                    className="w-full px-4 py-3 rounded-lg border border-saasha-cream dark:border-dark-border focus:outline-none focus:ring-2 focus:ring-saasha-rose/20 dark:bg-dark-secondary dark:text-dark-text"
+                    className={`w-full px-4 py-3 rounded-lg border ${
+                      errors.email ? 'border-red-500' : 'border-saasha-cream dark:border-dark-border'
+                    } focus:outline-none focus:ring-2 focus:ring-saasha-rose/20 dark:bg-dark-secondary dark:text-dark-text`}
                     placeholder="john@example.com"
                   />
+                  {errors.email && (
+                    <p className="mt-1 text-sm text-red-500">{errors.email}</p>
+                  )}
                 </div>
 
                 <div>
@@ -209,10 +261,14 @@ const Contact = () => {
                     name="subject"
                     value={formData.subject}
                     onChange={handleChange}
-                    required
-                    className="w-full px-4 py-3 rounded-lg border border-saasha-cream dark:border-dark-border focus:outline-none focus:ring-2 focus:ring-saasha-rose/20 dark:bg-dark-secondary dark:text-dark-text"
+                    className={`w-full px-4 py-3 rounded-lg border ${
+                      errors.subject ? 'border-red-500' : 'border-saasha-cream dark:border-dark-border'
+                    } focus:outline-none focus:ring-2 focus:ring-saasha-rose/20 dark:bg-dark-secondary dark:text-dark-text`}
                     placeholder="How can we help?"
                   />
+                  {errors.subject && (
+                    <p className="mt-1 text-sm text-red-500">{errors.subject}</p>
+                  )}
                 </div>
 
                 <div>
@@ -224,11 +280,15 @@ const Contact = () => {
                     name="message"
                     value={formData.message}
                     onChange={handleChange}
-                    required
                     rows={4}
-                    className="w-full px-4 py-3 rounded-lg border border-saasha-cream dark:border-dark-border focus:outline-none focus:ring-2 focus:ring-saasha-rose/20 dark:bg-dark-secondary dark:text-dark-text"
+                    className={`w-full px-4 py-3 rounded-lg border ${
+                      errors.message ? 'border-red-500' : 'border-saasha-cream dark:border-dark-border'
+                    } focus:outline-none focus:ring-2 focus:ring-saasha-rose/20 dark:bg-dark-secondary dark:text-dark-text`}
                     placeholder="Your message here..."
                   />
+                  {errors.message && (
+                    <p className="mt-1 text-sm text-red-500">{errors.message}</p>
+                  )}
                 </div>
 
                 <button
