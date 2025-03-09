@@ -1,12 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
-import PageLayout from '../components/layout/PageLayout';
+import PageLayout from './layout/PageLayout';
 
 const Team = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
-  const [direction, setDirection] = useState(0);
 
   const teamMembers = [
     { id: 1, name: 'Sanya', role: 'Co-Founder', imageUrl: 'https://i.imgur.com/cUokxUE.jpeg' },
@@ -33,7 +32,6 @@ const Team = () => {
     let interval: number;
     if (isAutoPlaying) {
       interval = window.setInterval(() => {
-        setDirection(1);
         setCurrentIndex((prevIndex) => 
           prevIndex === teamMembers.length - itemsPerPage.desktop ? 0 : prevIndex + 1
         );
@@ -43,14 +41,12 @@ const Team = () => {
   }, [isAutoPlaying, teamMembers.length]);
 
   const nextSlide = () => {
-    setDirection(1);
     setCurrentIndex((prevIndex) => 
       prevIndex === teamMembers.length - itemsPerPage.desktop ? 0 : prevIndex + 1
     );
   };
 
   const prevSlide = () => {
-    setDirection(-1);
     setCurrentIndex((prevIndex) => 
       prevIndex === 0 ? teamMembers.length - itemsPerPage.desktop : prevIndex - 1
     );
@@ -137,7 +133,6 @@ const Team = () => {
                       : 'w-2 bg-saasha-rose dark:bg-dark-accent/70 hover:bg-saasha-brown/70 dark:hover:bg-dark-accent'
                   }`}
                   onClick={() => {
-                    setDirection(index > Math.floor(currentIndex / itemsPerPage.desktop) ? 1 : -1);
                     setCurrentIndex(index * itemsPerPage.desktop);
                   }}
                   onMouseEnter={() => setIsAutoPlaying(false)}
