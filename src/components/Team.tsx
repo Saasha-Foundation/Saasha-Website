@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
 import { motion } from 'framer-motion';
 import PageLayout from './layout/PageLayout';
@@ -6,6 +6,7 @@ import PageLayout from './layout/PageLayout';
 const Team = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
 
   const teamMembers = [
     { id: 1, name: 'Sanya', role: 'Co-Founder', imageUrl: 'https://i.imgur.com/cUokxUE.jpeg' },
@@ -25,36 +26,55 @@ const Team = () => {
   const itemsPerPage = {
     desktop: 5,
     tablet: 3,
-    mobile: 2
+    mobile: 1
   };
+
+  // Get current items per page based on window width
+  const getCurrentItemsPerPage = () => {
+    if (windowWidth >= 1024) return itemsPerPage.desktop;
+    if (windowWidth >= 768) return itemsPerPage.tablet;
+    return itemsPerPage.mobile;
+  };
+
+  const currentItemsPerPage = getCurrentItemsPerPage();
 
   const toggleAutoplay = () => {
     setIsAutoPlaying(prev => !prev);
   };
 
   useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
     let interval: number;
     if (isAutoPlaying) {
       interval = window.setInterval(() => {
-        setCurrentIndex((prevIndex) => 
-          prevIndex === teamMembers.length - itemsPerPage.desktop ? 0 : prevIndex + 1
-        );
+        setCurrentIndex((prevIndex) => {
+          const maxIndex = teamMembers.length - currentItemsPerPage;
+          return prevIndex >= maxIndex ? 0 : prevIndex + currentItemsPerPage;
+        });
       }, 5000);
     }
     return () => clearInterval(interval);
-  }, [isAutoPlaying, teamMembers.length, itemsPerPage.desktop]);
+  }, [isAutoPlaying, teamMembers.length, currentItemsPerPage]);
 
   const nextSlide = () => {
     setCurrentIndex((prevIndex) => {
-      const maxIndex = teamMembers.length - itemsPerPage.desktop;
-      return prevIndex >= maxIndex ? 0 : prevIndex + itemsPerPage.mobile;
+      const maxIndex = teamMembers.length - currentItemsPerPage;
+      return prevIndex >= maxIndex ? 0 : prevIndex + currentItemsPerPage;
     });
   };
 
   const prevSlide = () => {
     setCurrentIndex((prevIndex) => {
-      const maxIndex = teamMembers.length - itemsPerPage.desktop;
-      return prevIndex <= 0 ? maxIndex : prevIndex - itemsPerPage.mobile;
+      const maxIndex = teamMembers.length - currentItemsPerPage;
+      return prevIndex === 0 ? maxIndex : prevIndex - currentItemsPerPage;
     });
   };
 
@@ -99,7 +119,7 @@ const Team = () => {
                 className="flex"
                 initial={false}
                 animate={{ 
-                  x: `-${currentIndex * (100 / itemsPerPage.desktop)}%` 
+                  x: `-${currentIndex * (100 / currentItemsPerPage)}%` 
                 }}
                 transition={{ 
                   type: "spring",
@@ -134,16 +154,16 @@ const Team = () => {
 
             {/* Dots Indicator */}
             <div className="flex justify-center mt-8 space-x-2">
-              {Array.from({ length: Math.ceil(teamMembers.length / itemsPerPage.desktop) }).map((_, index) => (
+              {Array.from({ length: Math.ceil(teamMembers.length / currentItemsPerPage) }).map((_, index) => (
                 <button
                   key={index}
                   className={`h-2 transition-all duration-300 rounded-full ${
-                    Math.floor(currentIndex / itemsPerPage.desktop) === index 
+                    Math.floor(currentIndex / currentItemsPerPage) === index 
                       ? 'w-8 bg-saasha-brown dark:bg-dark-accent' 
                       : 'w-2 bg-saasha-rose dark:bg-dark-accent/70 hover:bg-saasha-brown/70 dark:hover:bg-dark-accent'
                   }`}
                   onClick={() => {
-                    setCurrentIndex(index * itemsPerPage.desktop);
+                    setCurrentIndex(index * currentItemsPerPage);
                   }}
                 />
               ))}
