@@ -36,13 +36,6 @@ const Team = () => {
     mobile: 1
   };
 
-  // Card width classes based on screen size
-  const cardWidthClasses = {
-    mobile: "w-full", // Full width on mobile
-    tablet: "w-1/3", // 3 cards per row on tablet
-    desktop: "w-1/5" // 5 cards per row on desktop
-  };
-
   // Get current items per page based on window width
   const getCurrentItemsPerPage = () => {
     if (windowWidth >= 1024) return itemsPerPage.desktop;
@@ -157,13 +150,13 @@ const Team = () => {
                 {teamMembers.map((member) => (
                   <motion.div 
                     key={member.id}
-                    className={`flex-none ${windowWidth >= 1024 ? cardWidthClasses.desktop : windowWidth >= 768 ? cardWidthClasses.tablet : cardWidthClasses.mobile} px-4`}
+                    className="flex-none w-full sm:w-1/2 md:w-1/3 lg:w-1/5 px-4"
                     initial={{ opacity: 0.5 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.4 }}
                   >
                     <div className="bg-saasha-cream/30 dark:bg-dark-secondary rounded-xl p-6 text-center h-full transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                      <div className="mb-4 overflow-hidden rounded-full mx-auto w-40 h-40 sm:w-44 sm:h-44 md:w-48 md:h-48">
+                      <div className="mb-4 overflow-hidden rounded-full mx-auto w-32 h-32">
                         <img
                           src={member.imageUrl}
                           alt={member.name}
