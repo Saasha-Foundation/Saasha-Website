@@ -45,15 +45,17 @@ const Team = () => {
   }, [isAutoPlaying, teamMembers.length, itemsPerPage.desktop]);
 
   const nextSlide = () => {
-    setCurrentIndex((prevIndex) => 
-      prevIndex === teamMembers.length - itemsPerPage.desktop ? 0 : prevIndex + 1
-    );
+    setCurrentIndex((prevIndex) => {
+      const maxIndex = teamMembers.length - itemsPerPage.desktop;
+      return prevIndex >= maxIndex ? 0 : prevIndex + itemsPerPage.mobile;
+    });
   };
 
   const prevSlide = () => {
-    setCurrentIndex((prevIndex) => 
-      prevIndex === 0 ? teamMembers.length - itemsPerPage.desktop : prevIndex - 1
-    );
+    setCurrentIndex((prevIndex) => {
+      const maxIndex = teamMembers.length - itemsPerPage.desktop;
+      return prevIndex <= 0 ? maxIndex : prevIndex - itemsPerPage.mobile;
+    });
   };
 
   return (
