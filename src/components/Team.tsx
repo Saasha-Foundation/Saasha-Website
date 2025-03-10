@@ -36,6 +36,13 @@ const Team = () => {
     mobile: 1
   };
 
+  // Card width classes based on screen size
+  const cardWidthClasses = {
+    mobile: "w-full", // Full width on mobile
+    tablet: "w-1/3", // 3 cards per row on tablet
+    desktop: "w-1/5" // 5 cards per row on desktop
+  };
+
   // Get current items per page based on window width
   const getCurrentItemsPerPage = () => {
     if (windowWidth >= 1024) return itemsPerPage.desktop;
@@ -150,7 +157,7 @@ const Team = () => {
                 {teamMembers.map((member) => (
                   <motion.div 
                     key={member.id}
-                    className="flex-none w-full sm:w-1/2 md:w-1/3 lg:w-1/5 px-4"
+                    className={`flex-none ${windowWidth >= 1024 ? cardWidthClasses.desktop : windowWidth >= 768 ? cardWidthClasses.tablet : cardWidthClasses.mobile} px-4`}
                     initial={{ opacity: 0.5 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.4 }}
