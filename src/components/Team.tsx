@@ -156,7 +156,7 @@ const Team = () => {
                     transition={{ duration: 0.4 }}
                   >
                     <div className="bg-saasha-cream/30 dark:bg-dark-secondary rounded-xl p-6 text-center h-full transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                      <div className="mb-4 overflow-hidden rounded-xl mx-auto w-48 h-48 sm:w-40 sm:h-40 md:w-44 md:h-44 lg:w-48 lg:h-48">
+                      <div className="mb-4 overflow-hidden rounded-full mx-auto w-40 h-40 sm:w-44 sm:h-44 md:w-48 md:h-48">
                         <img
                           src={member.imageUrl}
                           alt={member.name}
