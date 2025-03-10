@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
 import { motion } from 'framer-motion';
 import PageLayout from './layout/PageLayout';
 
@@ -12,7 +12,7 @@ const Team = () => {
     { id: 2, name: 'Tanisha', role: 'Co-Founder', imageUrl: 'https://i.imgur.com/VfUhwwo.jpeg' },
     { id: 3, name: 'Aarya', role: 'Social Media Manager', imageUrl: 'https://i.imgur.com/RtKs0d5.jpeg' },
     { id: 4, name: 'Arnav', role: 'Lead Designer', imageUrl: 'https://i.imgur.com/Cae5gD4.jpeg' },
-    { id: 5, name: 'Akshat', role: 'Designer', imageUrl: 'https://i.imgur.com/HA6Fs1M.jpeg' },
+    { id: 5, name: 'Akshat', role: 'Designer', imageUrl: 'https://i.imgur.com/tRKueeb.jpeg' },
     { id: 6, name: 'Samisha', role: 'Creative Strategist', imageUrl: 'https://i.imgur.com/zUPEhLp.jpeg' },
     { id: 7, name: 'Krishnna', role: 'Creative Strategist', imageUrl: 'https://i.imgur.com/jnB7vm9.jpeg' },
     { id: 8, name: 'Yessa', role: 'Content Writer', imageUrl: 'https://i.imgur.com/L2OubBk.jpeg' },
@@ -23,9 +23,13 @@ const Team = () => {
   ];
 
   const itemsPerPage = {
-    desktop: 4,
+    desktop: 5,
     tablet: 3,
     mobile: 2
+  };
+
+  const toggleAutoplay = () => {
+    setIsAutoPlaying(prev => !prev);
   };
 
   useEffect(() => {
@@ -38,7 +42,7 @@ const Team = () => {
       }, 5000);
     }
     return () => clearInterval(interval);
-  }, [isAutoPlaying, teamMembers.length]);
+  }, [isAutoPlaying, teamMembers.length, itemsPerPage.desktop]);
 
   const nextSlide = () => {
     setCurrentIndex((prevIndex) => 
@@ -63,24 +67,28 @@ const Team = () => {
             </p>
           </div>
 
-          <div className="relative group">
+          <div className="relative">
             {/* Navigation Buttons */}
             <button 
               onClick={prevSlide}
-              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 lg:-translate-x-8 bg-saasha-brown/90 dark:bg-dark-accent/90 text-saasha-cream p-2 rounded-full hover:bg-saasha-rose dark:hover:bg-dark-accent transition-all duration-300 z-10 opacity-0 group-hover:opacity-100 focus:opacity-100"
-              onMouseEnter={() => setIsAutoPlaying(false)}
-              onMouseLeave={() => setIsAutoPlaying(true)}
+              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 lg:-translate-x-8 bg-saasha-brown/90 dark:bg-dark-accent/90 text-saasha-cream p-2 rounded-full hover:bg-saasha-rose dark:hover:bg-dark-accent transition-all duration-300 z-10 focus:opacity-100"
             >
               <ChevronLeft className="w-6 h-6" />
             </button>
 
             <button 
               onClick={nextSlide}
-              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 lg:translate-x-8 bg-saasha-brown/90 dark:bg-dark-accent/90 text-saasha-cream p-2 rounded-full hover:bg-saasha-rose dark:hover:bg-dark-accent transition-all duration-300 z-10 opacity-0 group-hover:opacity-100 focus:opacity-100"
-              onMouseEnter={() => setIsAutoPlaying(false)}
-              onMouseLeave={() => setIsAutoPlaying(true)}
+              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 lg:translate-x-8 bg-saasha-brown/90 dark:bg-dark-accent/90 text-saasha-cream p-2 rounded-full hover:bg-saasha-rose dark:hover:bg-dark-accent transition-all duration-300 z-10 focus:opacity-100"
             >
               <ChevronRight className="w-6 h-6" />
+            </button>
+
+            {/* Pause/Play Button */}
+            <button 
+              onClick={toggleAutoplay}
+              className="absolute right-1/2 top-0 translate-x-1/2 -translate-y-8 bg-saasha-brown/90 dark:bg-dark-accent/90 text-saasha-cream p-2 rounded-full hover:bg-saasha-rose dark:hover:bg-dark-accent transition-all duration-300 z-10 focus:opacity-100"
+            >
+              {isAutoPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
             </button>
 
             {/* Team Members Carousel */}
@@ -89,7 +97,7 @@ const Team = () => {
                 className="flex"
                 initial={false}
                 animate={{ 
-                  x: `-${currentIndex * 25}%` 
+                  x: `-${currentIndex * (100 / itemsPerPage.desktop)}%` 
                 }}
                 transition={{ 
                   type: "spring",
@@ -101,7 +109,7 @@ const Team = () => {
                 {teamMembers.map((member) => (
                   <motion.div 
                     key={member.id}
-                    className="flex-none w-full sm:w-1/2 md:w-1/3 lg:w-1/4 px-4"
+                    className="flex-none w-full sm:w-1/2 md:w-1/3 lg:w-1/5 px-4"
                     initial={{ opacity: 0.5 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.4 }}
@@ -135,8 +143,6 @@ const Team = () => {
                   onClick={() => {
                     setCurrentIndex(index * itemsPerPage.desktop);
                   }}
-                  onMouseEnter={() => setIsAutoPlaying(false)}
-                  onMouseLeave={() => setIsAutoPlaying(true)}
                 />
               ))}
             </div>
