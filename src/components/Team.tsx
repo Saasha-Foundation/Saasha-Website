@@ -18,7 +18,7 @@ const Team = () => {
     { id: 7, name: 'Krishnna', role: 'Creative Strategist', imageUrl: 'https://i.imgur.com/jnB7vm9.jpeg' },
     { id: 8, name: 'Yessa', role: 'Content Writer', imageUrl: 'https://i.imgur.com/L2OubBk.jpeg' },
     { id: 9, name: 'Prishita', role: 'Content Writer', imageUrl: 'https://i.imgur.com/lEnSCur.jpeg' },
-    { id: 10, name: 'Nihar', role: 'Event Manager', imageUrl: 'https://i.imgur.com/HOysoez.jpeg' },
+    { id: 10, name: 'Nihar', role: 'Event Manager', imageUrl: 'https://i.imgur.com/YEV2iU2.jpeg' },
     { id: 11, name: 'Meira', role: 'Photographer', imageUrl: 'https://i.imgur.com/mxffnJo.jpeg' },
     { id: 12, name: 'Anushka', role: 'Head of Content Creation', imageUrl: 'https://i.imgur.com/YHYITC3.jpeg' }
   ];
