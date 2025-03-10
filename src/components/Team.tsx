@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
 import { motion } from 'framer-motion';
 import PageLayout from './layout/PageLayout';
@@ -29,6 +29,13 @@ const Team = () => {
     mobile: 1
   };
 
+  // Cards to scroll per click
+  const scrollIncrement = {
+    desktop: 2,
+    tablet: 1,
+    mobile: 1
+  };
+
   // Get current items per page based on window width
   const getCurrentItemsPerPage = () => {
     if (windowWidth >= 1024) return itemsPerPage.desktop;
@@ -36,7 +43,15 @@ const Team = () => {
     return itemsPerPage.mobile;
   };
 
+  // Get current scroll increment based on window width
+  const getCurrentScrollIncrement = () => {
+    if (windowWidth >= 1024) return scrollIncrement.desktop;
+    if (windowWidth >= 768) return scrollIncrement.tablet;
+    return scrollIncrement.mobile;
+  };
+
   const currentItemsPerPage = getCurrentItemsPerPage();
+  const currentScrollIncrement = getCurrentScrollIncrement();
 
   const toggleAutoplay = () => {
     setIsAutoPlaying(prev => !prev);
@@ -57,24 +72,28 @@ const Team = () => {
       interval = window.setInterval(() => {
         setCurrentIndex((prevIndex) => {
           const maxIndex = teamMembers.length - currentItemsPerPage;
-          return prevIndex >= maxIndex ? 0 : prevIndex + currentItemsPerPage;
+          return prevIndex >= maxIndex ? 0 : prevIndex + currentScrollIncrement;
         });
       }, 5000);
     }
     return () => clearInterval(interval);
-  }, [isAutoPlaying, teamMembers.length, currentItemsPerPage]);
+  }, [isAutoPlaying, teamMembers.length, currentItemsPerPage, currentScrollIncrement]);
 
   const nextSlide = () => {
     setCurrentIndex((prevIndex) => {
       const maxIndex = teamMembers.length - currentItemsPerPage;
-      return prevIndex >= maxIndex ? 0 : prevIndex + currentItemsPerPage;
+      return prevIndex >= maxIndex ? 0 : prevIndex + currentScrollIncrement;
     });
   };
 
   const prevSlide = () => {
     setCurrentIndex((prevIndex) => {
       const maxIndex = teamMembers.length - currentItemsPerPage;
-      return prevIndex === 0 ? maxIndex : prevIndex - currentItemsPerPage;
+      if (prevIndex === 0) return maxIndex;
+      
+      // Ensure we don't go below 0
+      const newIndex = prevIndex - currentScrollIncrement;
+      return newIndex < 0 ? 0 : newIndex;
     });
   };
 
