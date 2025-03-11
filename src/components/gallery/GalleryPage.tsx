@@ -55,9 +55,9 @@ const GalleryPage = () => {
 
   return (
     <PageLayout>
-      <div className="py-16 px-4 sm:px-6 lg:px-8">
+      <div className="py-4 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
+          <div className="text-center mb-10">
             <h1 className="text-4xl font-bold text-saasha-brown dark:text-dark-text mb-4">
               Our Gallery
             </h1>
