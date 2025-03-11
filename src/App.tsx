@@ -20,6 +20,7 @@ import EventsPage from './components/events/EventsPage';
 import EventPage from './components/events/EventPage';
 import VolunteerPage from './components/volunteer/VolunteerPage';
 import FAQPage from './components/faq/FAQPage';
+import NotFound from './components/NotFound';
 import { Toaster } from 'react-hot-toast';
 
 // Protected Route component
@@ -90,6 +91,7 @@ const MainApp = () => {
             </ProtectedRoute>
           }
         />
+        <Route path="*" element={<NotFound />} />
       </Routes>
       <Footer />
       <DarkModeToggle />
