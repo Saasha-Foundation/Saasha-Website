@@ -20,6 +20,7 @@ import EventsPage from './components/events/EventsPage';
 import EventPage from './components/events/EventPage';
 import VolunteerPage from './components/volunteer/VolunteerPage';
 import FAQPage from './components/faq/FAQPage';
+import GalleryPage from './components/gallery/GalleryPage';
 import NotFound from './components/NotFound';
 import { Toaster } from 'react-hot-toast';
 
@@ -82,6 +83,7 @@ const MainApp = () => {
         <Route path="/blog" element={<Navigate to="/blogs" replace />} />
         <Route path="/blog/:slug" element={<BlogPost />} />
         <Route path="/faqs" element={<FAQPage />} />
+        <Route path="/gallery" element={<GalleryPage />} />
         <Route path="/admin" element={<AdminLogin />} />
         <Route
           path="/admin/dashboard"

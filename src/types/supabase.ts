@@ -112,6 +112,42 @@ export interface Database {
         };
         Relationships: [];
       };
+      gallery_images: {
+        Row: {
+          id: string;
+          title: string;
+          description: string;
+          image_url: string;
+          category: string;
+          created_at: string;
+          updated_at: string;
+          published: boolean;
+          order: number;
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          description: string;
+          image_url: string;
+          category: string;
+          created_at?: string;
+          updated_at?: string;
+          published?: boolean;
+          order?: number;
+        };
+        Update: {
+          id?: string;
+          title?: string;
+          description?: string;
+          image_url?: string;
+          category?: string;
+          created_at?: string;
+          updated_at?: string;
+          published?: boolean;
+          order?: number;
+        };
+        Relationships: [];
+      };
       volunteer_registrations: {
         Row: {
           id: string;

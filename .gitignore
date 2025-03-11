@@ -2,3 +2,4 @@ node_modules
 supabase/migrations/20250308_create_faqs_table.sql
 src/components/legacy_contact.tsx
 src/components/arnav_contact.tsx
+src/db/gallery_table.sql
