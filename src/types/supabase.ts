@@ -123,6 +123,8 @@ export interface Database {
           updated_at: string;
           published: boolean;
           order: number;
+          group_id: string | null;
+          is_cover: boolean;
         };
         Insert: {
           id?: string;
@@ -134,6 +136,8 @@ export interface Database {
           updated_at?: string;
           published?: boolean;
           order?: number;
+          group_id?: string | null;
+          is_cover?: boolean;
         };
         Update: {
           id?: string;
@@ -145,6 +149,8 @@ export interface Database {
           updated_at?: string;
           published?: boolean;
           order?: number;
+          group_id?: string | null;
+          is_cover?: boolean;
         };
         Relationships: [];
       };

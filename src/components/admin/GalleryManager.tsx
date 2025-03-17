@@ -18,8 +18,11 @@ const GalleryManager: React.FC = () => {
     image_url: '',
     category: '',
     published: true,
-    order: 0
+    order: 0,
+    group_id: null,
+    is_cover: false
   });
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -62,8 +65,8 @@ const GalleryManager: React.FC = () => {
         cloudName: CLOUD_NAME,
         uploadPreset: CLOUDINARY_PRESET,
         sources: ['local', 'url', 'camera'],
-        multiple: false,
-        maxFiles: 1,
+        multiple: true,
+        maxFiles: 10,
         maxFileSize: 10000000, // 10MB
         styles: {
           palette: {
@@ -85,10 +88,14 @@ const GalleryManager: React.FC = () => {
       },
       (error: any, result: any) => {
         if (!error && result && result.event === 'success') {
-          setFormData(prev => ({
-            ...prev,
-            image_url: result.info.secure_url
-          }));
+          setUploadedImages(prev => [...prev, result.info.secure_url]);
+          if (uploadedImages.length === 0) {
+            setFormData(prev => ({
+              ...prev,
+              image_url: result.info.secure_url,
+              is_cover: true
+            }));
+          }
           toast.success('Image uploaded successfully');
         }
       }
@@ -102,8 +109,8 @@ const GalleryManager: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      if (!formData.image_url) {
-        throw new Error('Please upload an image');
+      if (uploadedImages.length === 0) {
+        throw new Error('Please upload at least one image');
       }
 
       if (editingId) {
@@ -124,17 +131,24 @@ const GalleryManager: React.FC = () => {
         if (error) throw error;
         toast.success('Gallery image updated successfully');
       } else {
-        // Create new image
+        // Create new group of images
+        const groupId = crypto.randomUUID();
+        const imagesToInsert = uploadedImages.map((imageUrl, index) => ({
+          ...formData,
+          image_url: imageUrl,
+          group_id: groupId,
+          is_cover: index === 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          order: formData.order + index
+        }));
+
         const { error } = await supabase
           .from('gallery_images')
-          .insert([{
-            ...formData,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          }]);
+          .insert(imagesToInsert);
 
         if (error) throw error;
-        toast.success('Gallery image added successfully');
+        toast.success('Gallery images added successfully');
       }
 
       // Reset form and refresh images
@@ -187,8 +201,11 @@ const GalleryManager: React.FC = () => {
       image_url: '',
       category: '',
       published: true,
-      order: images.length
+      order: images.length,
+      group_id: null,
+      is_cover: false
     });
+    setUploadedImages([]);
     setEditingId(null);
     setShowForm(false);
   };

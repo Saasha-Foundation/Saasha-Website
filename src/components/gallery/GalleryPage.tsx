@@ -49,9 +49,11 @@ const GalleryPage = () => {
     }
   };
 
-  const filteredImages = selectedCategory === 'all' 
+  // Get only cover images or standalone images
+  const filteredImages = (selectedCategory === 'all' 
     ? images 
-    : images.filter(img => img.category === selectedCategory);
+    : images.filter(img => img.category === selectedCategory))
+    .filter(img => !img.group_id || img.is_cover);
 
   return (
     <PageLayout>
@@ -122,6 +124,16 @@ const GalleryPage = () => {
                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
                         <h3 className="text-white text-lg font-semibold">{image.title}</h3>
                         <p className="text-white/80 text-sm mt-1">{image.category}</p>
+                        {image.group_id && image.is_cover && (
+                          <div className="flex items-center mt-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white/80 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                            </svg>
+                            <span className="text-white/80 text-sm">
+                              {images.filter(img => img.group_id === image.group_id).length} photos
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -156,6 +168,21 @@ const GalleryPage = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
+              {selectedImage.group_id && (
+                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
+                  {images
+                    .filter(img => img.group_id === selectedImage.group_id)
+                    .map((img, index) => (
+                      <button
+                        key={img.id}
+                        onClick={() => setSelectedImage(img)}
+                        className={`w-3 h-3 rounded-full transition-colors duration-300 ${img.id === selectedImage.id ? 'bg-white' : 'bg-white/50 hover:bg-white/70'}`}
+                        aria-label={`View image ${index + 1}`}
+                      />
+                    ))
+                  }
+                </div>
+              )}
             </div>
             <div className="p-6">
               <h3 className="text-2xl font-bold text-saasha-brown dark:text-dark-text">{selectedImage.title}</h3>

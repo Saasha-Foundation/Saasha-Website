@@ -17,7 +17,7 @@ const VolunteerPage = () => {
             </p>
           </div>
 
-          {/* Impact Stats */}
+          {/*
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
             <div className="bg-white dark:bg-dark-secondary rounded-lg p-6 text-center shadow-lg">
               <div className="text-3xl font-bold text-saasha-brown dark:text-dark-text mb-2">100+</div>
@@ -31,7 +31,7 @@ const VolunteerPage = () => {
               <div className="text-3xl font-bold text-saasha-brown dark:text-dark-text mb-2">1000+</div>
               <div className="text-gray-600 dark:text-gray-300">Lives Impacted</div>
             </div>
-          </div>
+          </div>*/}
 
           {/* Why Volunteer Section */}
           <div className="bg-saasha-cream/20 dark:bg-dark-secondary rounded-lg p-8 mb-16">
