@@ -12,7 +12,7 @@ const GalleryPage = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+
   const location = useLocation();
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
@@ -151,7 +151,7 @@ const GalleryPage = () => {
                           onClick={() => setSelectedImage(image)}
                           className={`group relative overflow-hidden rounded-2xl shadow-lg cursor-pointer transform transition-all duration-500 hover:shadow-xl ${isGroup ? 'hover:scale-[1.02]' : 'hover:scale-[1.03]'}`}
                         >
-                          <div className={`relative ${isGroup ? 'aspect-[4/5]' : 'aspect-[3/4]'}`}>
+                          <div className="relative aspect-[16/9]">
                             <img 
                               src={image.image_url} 
                               alt={image.title} 

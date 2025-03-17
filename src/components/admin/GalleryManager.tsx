@@ -562,11 +562,15 @@ const GalleryManager: React.FC = () => {
               
               {/* Grouped Images */}
               {Object.entries(groupedImages).map(([groupId, groupImages]) => {
+                // Find the cover image
                 const coverImage = groupImages.find(img => img.is_cover);
-                const [currentImageIndex, setCurrentImageIndex] = useState(0);
-                const currentImage = groupImages[currentImageIndex];
+                if (!coverImage) return null;
+
+                // Get the current image index from local state
+                const currentIndex = groupImages.findIndex(img => img.is_cover);
+                const currentImage = groupImages[currentIndex];
                 
-                if (!coverImage || !currentImage) return null;
+                if (!currentImage) return null;
                 
                 return (
                   <div key={groupId} className="bg-white dark:bg-dark-secondary rounded-xl shadow-lg overflow-hidden">
@@ -585,7 +589,17 @@ const GalleryManager: React.FC = () => {
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setCurrentImageIndex(prev => prev - 1);
+                                const newIndex = currentIndex - 1;
+                                if (newIndex >= 0) {
+                                  setImages(prevImages => {
+                                    const newImages = [...prevImages];
+                                    const groupImgs = newImages.filter(img => img.group_id === groupId);
+                                    groupImgs.forEach(img => img.is_cover = false);
+                                    const targetImg = groupImgs[newIndex];
+                                    if (targetImg) targetImg.is_cover = true;
+                                    return newImages;
+                                  });
+                                }
                               }}
                               className="p-2 rounded-full bg-black/20 hover:bg-black/40 text-white pointer-events-auto transition-colors duration-200"
                             >
@@ -598,7 +612,17 @@ const GalleryManager: React.FC = () => {
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setCurrentImageIndex(prev => prev + 1);
+                                const newIndex = currentIndex + 1;
+                                if (newIndex < groupImages.length) {
+                                  setImages(prevImages => {
+                                    const newImages = [...prevImages];
+                                    const groupImgs = newImages.filter(img => img.group_id === groupId);
+                                    groupImgs.forEach(img => img.is_cover = false);
+                                    const targetImg = groupImgs[newIndex];
+                                    if (targetImg) targetImg.is_cover = true;
+                                    return newImages;
+                                  });
+                                }
                               }}
                               className="p-2 rounded-full bg-black/20 hover:bg-black/40 text-white pointer-events-auto transition-colors duration-200"
                             >
@@ -611,7 +635,7 @@ const GalleryManager: React.FC = () => {
                         
                         {/* Image Counter */}
                         <div className="absolute top-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm backdrop-blur-sm">
-                          {currentImageIndex + 1} / {groupImages.length}
+                          {currentIndex + 1} / {groupImages.length}
                         </div>
                         
                         {/* Draft Badge */}
@@ -627,8 +651,17 @@ const GalleryManager: React.FC = () => {
                             {groupImages.map((img, index) => (
                               <button
                                 key={img.id}
-                                onClick={() => setCurrentImageIndex(index)}
-                                className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden transition-all duration-200 ${index === currentImageIndex ? 'ring-2 ring-white scale-105' : 'opacity-70 hover:opacity-100'}`}
+                                onClick={() => {
+                                  setImages(prevImages => {
+                                    const newImages = [...prevImages];
+                                    const groupImgs = newImages.filter(img => img.group_id === groupId);
+                                    groupImgs.forEach(img => img.is_cover = false);
+                                    const targetImg = groupImgs[index];
+                                    if (targetImg) targetImg.is_cover = true;
+                                    return newImages;
+                                  });
+                                }}
+                                className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden transition-all duration-200 ${index === currentIndex ? 'ring-2 ring-white scale-105' : 'opacity-70 hover:opacity-100'}`}
                               >
                                 <img 
                                   src={img.image_url} 
