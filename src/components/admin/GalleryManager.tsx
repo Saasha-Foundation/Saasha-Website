@@ -29,6 +29,7 @@ const GalleryManager: React.FC = () => {
   });
   const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
   const [groupedImages, setGroupedImages] = useState<{ [key: string]: GalleryImage[] }>({});
+  const [currentGroupImageIndexes, setCurrentGroupImageIndexes] = useState<{ [key: string]: number }>({});
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -49,7 +50,17 @@ const GalleryManager: React.FC = () => {
       }
       return acc;
     }, {} as { [key: string]: GalleryImage[] });
+
+    // Initialize current image indexes for each group
+    const initialIndexes = Object.keys(grouped).reduce((acc, groupId) => {
+      const groupImages = grouped[groupId];
+      const coverIndex = groupImages.findIndex(img => img.is_cover);
+      acc[groupId] = coverIndex >= 0 ? coverIndex : 0;
+      return acc;
+    }, {} as { [key: string]: number });
+
     setGroupedImages(grouped);
+    setCurrentGroupImageIndexes(initialIndexes);
   }, [images]);
 
   const fetchImages = async () => {
@@ -562,12 +573,10 @@ const GalleryManager: React.FC = () => {
               
               {/* Grouped Images */}
               {Object.entries(groupedImages).map(([groupId, groupImages]) => {
-                // Find the cover image
                 const coverImage = groupImages.find(img => img.is_cover);
                 if (!coverImage) return null;
 
-                // Get the current image index from local state
-                const currentIndex = groupImages.findIndex(img => img.is_cover);
+                const currentIndex = currentGroupImageIndexes[groupId] || 0;
                 const currentImage = groupImages[currentIndex];
                 
                 if (!currentImage) return null;
@@ -591,14 +600,10 @@ const GalleryManager: React.FC = () => {
                                 e.stopPropagation();
                                 const newIndex = currentIndex - 1;
                                 if (newIndex >= 0) {
-                                  setImages(prevImages => {
-                                    const newImages = [...prevImages];
-                                    const groupImgs = newImages.filter(img => img.group_id === groupId);
-                                    groupImgs.forEach(img => img.is_cover = false);
-                                    const targetImg = groupImgs[newIndex];
-                                    if (targetImg) targetImg.is_cover = true;
-                                    return newImages;
-                                  });
+                                  setCurrentGroupImageIndexes(prev => ({
+                                    ...prev,
+                                    [groupId]: newIndex
+                                  }));
                                 }
                               }}
                               className="p-2 rounded-full bg-black/20 hover:bg-black/40 text-white pointer-events-auto transition-colors duration-200"
@@ -614,14 +619,10 @@ const GalleryManager: React.FC = () => {
                                 e.stopPropagation();
                                 const newIndex = currentIndex + 1;
                                 if (newIndex < groupImages.length) {
-                                  setImages(prevImages => {
-                                    const newImages = [...prevImages];
-                                    const groupImgs = newImages.filter(img => img.group_id === groupId);
-                                    groupImgs.forEach(img => img.is_cover = false);
-                                    const targetImg = groupImgs[newIndex];
-                                    if (targetImg) targetImg.is_cover = true;
-                                    return newImages;
-                                  });
+                                  setCurrentGroupImageIndexes(prev => ({
+                                    ...prev,
+                                    [groupId]: newIndex
+                                  }));
                                 }
                               }}
                               className="p-2 rounded-full bg-black/20 hover:bg-black/40 text-white pointer-events-auto transition-colors duration-200"
@@ -652,14 +653,10 @@ const GalleryManager: React.FC = () => {
                               <button
                                 key={img.id}
                                 onClick={() => {
-                                  setImages(prevImages => {
-                                    const newImages = [...prevImages];
-                                    const groupImgs = newImages.filter(img => img.group_id === groupId);
-                                    groupImgs.forEach(img => img.is_cover = false);
-                                    const targetImg = groupImgs[index];
-                                    if (targetImg) targetImg.is_cover = true;
-                                    return newImages;
-                                  });
+                                  setCurrentGroupImageIndexes(prev => ({
+                                    ...prev,
+                                    [groupId]: index
+                                  }));
                                 }}
                                 className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden transition-all duration-200 ${index === currentIndex ? 'ring-2 ring-white scale-105' : 'opacity-70 hover:opacity-100'}`}
                               >
