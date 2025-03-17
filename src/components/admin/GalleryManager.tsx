@@ -29,7 +29,6 @@ const GalleryManager: React.FC = () => {
   });
   const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
   const [groupedImages, setGroupedImages] = useState<{ [key: string]: GalleryImage[] }>({});
-  const [currentGroupImageIndexes, setCurrentGroupImageIndexes] = useState<{ [key: string]: number }>({});
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -51,16 +50,7 @@ const GalleryManager: React.FC = () => {
       return acc;
     }, {} as { [key: string]: GalleryImage[] });
 
-    // Initialize current image indexes for each group
-    const initialIndexes = Object.keys(grouped).reduce((acc, groupId) => {
-      const groupImages = grouped[groupId];
-      const coverIndex = groupImages.findIndex(img => img.is_cover);
-      acc[groupId] = coverIndex >= 0 ? coverIndex : 0;
-      return acc;
-    }, {} as { [key: string]: number });
-
     setGroupedImages(grouped);
-    setCurrentGroupImageIndexes(initialIndexes);
   }, [images]);
 
   const fetchImages = async () => {
@@ -522,207 +512,65 @@ const GalleryManager: React.FC = () => {
               <p className="text-gray-500 dark:text-gray-400">No gallery images found. Add your first image!</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-8">
-              {/* Standalone Images */}
-              {images
-                .filter(img => !img.group_id)
-                .map((image) => (
-                  <div key={image.id} className="bg-white dark:bg-dark-secondary rounded-xl shadow-lg overflow-hidden">
-                    <div className="flex flex-col md:flex-row">
-                      <div className="relative md:w-72 h-64 md:h-auto">
-                        <img 
-                          src={image.image_url} 
-                          alt={image.title} 
-                          className="w-full h-full object-cover"
-                        />
-                        {!image.published && (
-                          <div className="absolute top-4 right-4 bg-yellow-500 text-white px-3 py-1 rounded-full text-sm font-medium">
-                            Draft
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex-1 p-6">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h3 className="text-xl font-semibold text-saasha-brown dark:text-dark-text">{image.title}</h3>
-                            <p className="text-sm text-saasha-rose dark:text-dark-accent mt-1">{image.category}</p>
-                          </div>
-                          <span className="inline-flex items-center justify-center h-7 w-7 rounded-full bg-gray-100 dark:bg-dark-primary text-sm font-medium text-gray-800 dark:text-gray-200">
-                            {image.order}
-                          </span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {images.map((image) => {
+                const isGroupCover = image.group_id && image.is_cover;
+                const groupImages = isGroupCover ? images.filter(img => img.group_id === image.group_id) : [];
+                
+                return (
+                  <div key={image.id} className="bg-white dark:bg-dark-secondary rounded-lg shadow-md overflow-hidden">
+                    <div className="relative h-48">
+                      <img 
+                        src={image.image_url} 
+                        alt={image.title} 
+                        className="w-full h-full object-cover"
+                      />
+                      {!image.published && (
+                        <div className="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded-full">
+                          Draft
                         </div>
-                        <p className="mt-4 text-gray-600 dark:text-gray-300">{image.description}</p>
-                        <div className="mt-6 flex justify-end space-x-3">
+                      )}
+                      {isGroupCover && (
+                        <div className="absolute top-2 left-2 bg-saasha-rose text-white text-xs px-2 py-1 rounded-full">
+                          Group ({groupImages.length} photos)
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-4">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="text-lg font-medium text-saasha-brown dark:text-dark-text">{image.title}</h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{image.category}</p>
+                        </div>
+                        <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-gray-200 dark:bg-dark-primary text-xs font-medium text-gray-800 dark:text-gray-200">
+                          {image.order}
+                        </span>
+                      </div>
+                      <p className="mt-2 text-sm text-gray-600 dark:text-gray-300 line-clamp-2">{image.description}</p>
+                      <div className="mt-4 flex justify-end space-x-2">
+                        {isGroupCover && groupImages.map((groupImage, index) => (
+                          <button
+                            key={groupImage.id}
+                            onClick={() => handleEdit(groupImage)}
+                            className="text-xs px-2 py-1 bg-gray-100 dark:bg-dark-primary text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-dark-primary/80"
+                          >
+                            Edit {index + 1}
+                          </button>
+                        ))}
+                        {!image.group_id && (
                           <button
                             onClick={() => handleEdit(image)}
-                            className="px-4 py-2 bg-gray-100 dark:bg-dark-primary text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-dark-primary/80 transition-colors duration-200"
+                            className="text-xs px-2 py-1 bg-gray-100 dark:bg-dark-primary text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-dark-primary/80"
                           >
                             Edit
                           </button>
-                          <button
-                            onClick={() => handleDelete(image.id)}
-                            className="px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors duration-200"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              
-              {/* Grouped Images */}
-              {Object.entries(groupedImages).map(([groupId, groupImages]) => {
-                const coverImage = groupImages.find(img => img.is_cover);
-                if (!coverImage) return null;
-
-                const currentIndex = currentGroupImageIndexes[groupId] || 0;
-                const currentImage = groupImages[currentIndex];
-                
-                if (!currentImage) return null;
-                
-                return (
-                  <div key={groupId} className="bg-white dark:bg-dark-secondary rounded-xl shadow-lg overflow-hidden">
-                    <div className="flex flex-col md:flex-row">
-                      {/* Image Section with Navigation */}
-                      <div className="relative md:w-96 h-80 md:h-auto">
-                        <img 
-                          src={currentImage.image_url} 
-                          alt={currentImage.title} 
-                          className="w-full h-full object-cover"
-                        />
-                        
-                        {/* Navigation Arrows */}
-                        <div className="absolute inset-x-4 top-1/2 -translate-y-1/2 flex justify-between pointer-events-none">
-                          {currentImageIndex > 0 && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                const newIndex = currentIndex - 1;
-                                if (newIndex >= 0) {
-                                  setCurrentGroupImageIndexes(prev => ({
-                                    ...prev,
-                                    [groupId]: newIndex
-                                  }));
-                                }
-                              }}
-                              className="p-2 rounded-full bg-black/20 hover:bg-black/40 text-white pointer-events-auto transition-colors duration-200"
-                            >
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                              </svg>
-                            </button>
-                          )}
-                          {currentImageIndex < groupImages.length - 1 && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                const newIndex = currentIndex + 1;
-                                if (newIndex < groupImages.length) {
-                                  setCurrentGroupImageIndexes(prev => ({
-                                    ...prev,
-                                    [groupId]: newIndex
-                                  }));
-                                }
-                              }}
-                              className="p-2 rounded-full bg-black/20 hover:bg-black/40 text-white pointer-events-auto transition-colors duration-200"
-                            >
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                              </svg>
-                            </button>
-                          )}
-                        </div>
-                        
-                        {/* Image Counter */}
-                        <div className="absolute top-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm backdrop-blur-sm">
-                          {currentIndex + 1} / {groupImages.length}
-                        </div>
-                        
-                        {/* Draft Badge */}
-                        {!currentImage.published && (
-                          <div className="absolute top-4 left-4 bg-yellow-500 text-white px-3 py-1 rounded-full text-sm font-medium">
-                            Draft
-                          </div>
                         )}
-                        
-                        {/* Thumbnail Strip */}
-                        <div className="absolute bottom-4 inset-x-4">
-                          <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-2">
-                            {groupImages.map((img, index) => (
-                              <button
-                                key={img.id}
-                                onClick={() => {
-                                  setCurrentGroupImageIndexes(prev => ({
-                                    ...prev,
-                                    [groupId]: index
-                                  }));
-                                }}
-                                className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden transition-all duration-200 ${index === currentIndex ? 'ring-2 ring-white scale-105' : 'opacity-70 hover:opacity-100'}`}
-                              >
-                                <img 
-                                  src={img.image_url} 
-                                  alt={`Thumbnail ${index + 1}`}
-                                  className="w-full h-full object-cover"
-                                />
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                      
-                      {/* Content Section */}
-                      <div className="flex-1 p-6">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h3 className="text-xl font-semibold text-saasha-brown dark:text-dark-text">{coverImage.title}</h3>
-                            <p className="text-sm text-saasha-rose dark:text-dark-accent mt-1">{coverImage.category}</p>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="inline-flex items-center justify-center h-7 px-3 rounded-full bg-gray-100 dark:bg-dark-primary text-sm font-medium text-gray-800 dark:text-gray-200">
-                              {groupImages.length} photos
-                            </span>
-                            <span className="inline-flex items-center justify-center h-7 w-7 rounded-full bg-gray-100 dark:bg-dark-primary text-sm font-medium text-gray-800 dark:text-gray-200">
-                              {coverImage.order}
-                            </span>
-                          </div>
-                        </div>
-                        
-                        <p className="mt-4 text-gray-600 dark:text-gray-300">{coverImage.description}</p>
-                        
-                        <div className="mt-6 flex flex-wrap gap-3">
-                          {/* Group Actions */}
-                          <div className="flex-1 flex justify-start space-x-3">
-                            <button
-                              onClick={() => handleEdit(coverImage)}
-                              className="px-4 py-2 bg-gray-100 dark:bg-dark-primary text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-dark-primary/80 transition-colors duration-200"
-                            >
-                              Edit Group
-                            </button>
-                            <button
-                              onClick={() => handleDelete(groupId)}
-                              className="px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors duration-200"
-                            >
-                              Delete Group
-                            </button>
-                          </div>
-                          
-                          {/* Current Image Actions */}
-                          <div className="flex justify-end space-x-3">
-                            <button
-                              onClick={() => handleEdit(currentImage)}
-                              className="px-4 py-2 bg-gray-100 dark:bg-dark-primary text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-dark-primary/80 transition-colors duration-200"
-                            >
-                              Edit Current
-                            </button>
-                            <button
-                              onClick={() => handleDelete(currentImage.id)}
-                              className="px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors duration-200"
-                            >
-                              Delete Current
-                            </button>
-                          </div>
-                        </div>
+                        <button
+                          onClick={() => handleDelete(isGroupCover ? image.group_id! : image.id)}
+                          className="text-xs px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded hover:bg-red-200 dark:hover:bg-red-900/50"
+                        >
+                          {isGroupCover ? 'Delete Group' : 'Delete'}
+                        </button>
                       </div>
                     </div>
                   </div>
