@@ -9,6 +9,11 @@ type GalleryImageInsert = Database['public']['Tables']['gallery_images']['Insert
 const CLOUDINARY_PRESET = 'saasha_blog';
 const CLOUD_NAME = 'daoicwuqc';
 
+interface UploadedImage {
+  url: string;
+  isCover: boolean;
+}
+
 const GalleryManager: React.FC = () => {
   const [images, setImages] = useState<GalleryImage[]>([]);
   const [loading, setLoading] = useState(true);
@@ -22,7 +27,8 @@ const GalleryManager: React.FC = () => {
     group_id: null,
     is_cover: false
   });
-  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
+  const [groupedImages, setGroupedImages] = useState<{ [key: string]: GalleryImage[] }>({});
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -31,6 +37,20 @@ const GalleryManager: React.FC = () => {
   useEffect(() => {
     fetchImages();
   }, []);
+
+  useEffect(() => {
+    // Group images by group_id
+    const grouped = images.reduce((acc, img) => {
+      if (img.group_id) {
+        if (!acc[img.group_id]) {
+          acc[img.group_id] = [];
+        }
+        acc[img.group_id].push(img);
+      }
+      return acc;
+    }, {} as { [key: string]: GalleryImage[] });
+    setGroupedImages(grouped);
+  }, [images]);
 
   const fetchImages = async () => {
     setLoading(true);
@@ -52,6 +72,36 @@ const GalleryManager: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+
+
+  const handleSetCover = (index: number) => {
+    setUploadedImages(prev => prev.map((img, i) => ({
+      ...img,
+      isCover: i === index
+    })));
+    setFormData(prev => ({
+      ...prev,
+      image_url: uploadedImages[index].url,
+      is_cover: true
+    }));
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setUploadedImages(prev => {
+      const newImages = prev.filter((_, i) => i !== index);
+      // If we removed the cover image, set the first remaining image as cover
+      if (prev[index].isCover && newImages.length > 0) {
+        newImages[0].isCover = true;
+        setFormData(prev => ({
+          ...prev,
+          image_url: newImages[0].url,
+          is_cover: true
+        }));
+      }
+      return newImages;
+    });
   };
 
   const handleImageUpload = () => {
@@ -88,7 +138,11 @@ const GalleryManager: React.FC = () => {
       },
       (error: any, result: any) => {
         if (!error && result && result.event === 'success') {
-          setUploadedImages(prev => [...prev, result.info.secure_url]);
+          const newImage = {
+            url: result.info.secure_url,
+            isCover: uploadedImages.length === 0
+          };
+          setUploadedImages(prev => [...prev, newImage]);
           if (uploadedImages.length === 0) {
             setFormData(prev => ({
               ...prev,
@@ -113,6 +167,11 @@ const GalleryManager: React.FC = () => {
         throw new Error('Please upload at least one image');
       }
 
+      // Ensure at least one image is marked as cover
+      if (!uploadedImages.some(img => img.isCover)) {
+        throw new Error('Please select a cover image');
+      }
+
       if (editingId) {
         // Update existing image
         const { error } = await supabase
@@ -123,7 +182,7 @@ const GalleryManager: React.FC = () => {
             image_url: formData.image_url,
             category: formData.category,
             published: formData.published,
-            order: formData.order,
+            order: formData.order || 0,
             updated_at: new Date().toISOString()
           })
           .eq('id', editingId);
@@ -133,14 +192,14 @@ const GalleryManager: React.FC = () => {
       } else {
         // Create new group of images
         const groupId = crypto.randomUUID();
-        const imagesToInsert = uploadedImages.map((imageUrl, index) => ({
+        const imagesToInsert = uploadedImages.map((image, index) => ({
           ...formData,
-          image_url: imageUrl,
-          group_id: groupId,
-          is_cover: index === 0,
+          image_url: image.url,
+          group_id: uploadedImages.length > 1 ? groupId : null,
+          is_cover: image.isCover,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-          order: formData.order + index
+          order: (formData.order || 0) + index
         }));
 
         const { error } = await supabase
@@ -180,19 +239,37 @@ const GalleryManager: React.FC = () => {
     if (!window.confirm('Are you sure you want to delete this image?')) return;
 
     try {
-      const { error } = await supabase
-        .from('gallery_images')
-        .delete()
-        .eq('id', id);
+      // Check if this is a group ID
+      const isGroupId = Object.keys(groupedImages).includes(id);
+      
+      if (isGroupId) {
+        // Delete all images in the group
+        const { error } = await supabase
+          .from('gallery_images')
+          .delete()
+          .eq('group_id', id);
 
-      if (error) throw error;
-      toast.success('Gallery image deleted successfully');
+        if (error) throw error;
+        toast.success('Gallery group deleted successfully');
+      } else {
+        // Delete single image
+        const { error } = await supabase
+          .from('gallery_images')
+          .delete()
+          .eq('id', id);
+
+        if (error) throw error;
+        toast.success('Gallery image deleted successfully');
+      }
+      
       fetchImages();
     } catch (error) {
       console.error('Error deleting gallery image:', error);
       toast.error('Failed to delete gallery image');
     }
   };
+
+
 
   const resetForm = () => {
     setFormData({
@@ -211,8 +288,8 @@ const GalleryManager: React.FC = () => {
   };
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-saasha-brown dark:text-dark-text">
           Gallery Images
         </h2>
@@ -299,25 +376,66 @@ const GalleryManager: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-saasha-brown dark:text-dark-text mb-1">
-                Image
-              </label>
-              <button
-                type="button"
-                onClick={handleImageUpload}
-                disabled={isSubmitting}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-saasha-rose focus:border-saasha-rose dark:bg-dark-secondary dark:border-gray-600 dark:text-dark-text text-left disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {formData.image_url ? 'Change Image' : 'Upload Image'}
-              </button>
-              {formData.image_url && (
-                <div className="mt-2">
-                  <img
-                    src={formData.image_url}
-                    alt="Image preview"
-                    className="h-32 object-cover rounded"
-                  />
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <label className="block text-sm font-medium text-saasha-brown dark:text-dark-text">
+                  Images
+                </label>
+                <button
+                  type="button"
+                  onClick={handleImageUpload}
+                  disabled={isSubmitting}
+                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-dark-secondary dark:hover:bg-dark-secondary/80 text-saasha-brown dark:text-dark-text rounded-md focus:outline-none focus:ring-2 focus:ring-saasha-rose flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  {uploadedImages.length === 0 ? 'Add Images' : 'Add More Images'}
+                </button>
+              </div>
+
+              {uploadedImages.length > 0 && (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                  {uploadedImages.map((image, index) => (
+                    <div key={image.url} className="relative group">
+                      <div className="aspect-w-4 aspect-h-3 rounded-lg overflow-hidden">
+                        <img 
+                          src={image.url} 
+                          alt={`Preview ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleSetCover(index)}
+                            className={`p-2 rounded-full ${image.isCover ? 'bg-saasha-rose text-white' : 'bg-white/80 text-gray-800 hover:bg-white'}`}
+                            title={image.isCover ? 'Cover Image' : 'Set as Cover'}
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                            </svg>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveImage(index)}
+                            className="p-2 rounded-full bg-white/80 text-red-600 hover:bg-white"
+                            title="Remove Image"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                      {image.isCover && (
+                        <div className="absolute top-2 left-2 bg-saasha-rose text-white text-xs px-2 py-1 rounded-full">
+                          Cover
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
