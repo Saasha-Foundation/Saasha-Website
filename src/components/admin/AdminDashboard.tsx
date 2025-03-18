@@ -124,16 +124,35 @@ const AdminDashboard = () => {
       let error;
 
       if (editingId) {
-        // Update existing post
+        // Update existing post - only send fields that should be updated
+        const updateData = {
+          title: formData.title,
+          content: formData.content,
+          header_image: formData.header_image,
+          tags: formData.tags,
+          slug: slug,
+          updated_at: new Date().toISOString()
+        };
+
         ({ error } = await supabase
           .from('blog_posts')
-          .update({ ...formData, slug })
+          .update(updateData)
           .eq('id', editingId));
       } else {
-        // Create new post
+        // Create new post - exclude id field to let Supabase auto-generate it
+        const insertData = {
+          title: formData.title,
+          content: formData.content,
+          header_image: formData.header_image,
+          tags: formData.tags,
+          slug: slug,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+
         ({ error } = await supabase
           .from('blog_posts')
-          .insert([{ ...formData, slug }]));
+          .insert([insertData]));
       }
 
       if (error) throw error;
