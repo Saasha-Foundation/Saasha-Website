@@ -108,11 +108,35 @@ const AdminDashboard = () => {
     widget.open();
   };
 
-  const generateSlug = (title: string) => {
-    return title
+  const generateUniqueSlug = async (title: string, currentId?: number): Promise<string> => {
+    const baseSlug = title
       .toLowerCase()
       .replace(/[^\w\s-]/g, '')
       .replace(/\s+/g, '-');
+    
+    let finalSlug = baseSlug;
+    let counter = 0;
+    
+    while (true) {
+      // Check if slug exists, excluding the current post if editing
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .select('id')
+        .eq('slug', finalSlug)
+        .neq('id', currentId || 0)
+        .maybeSingle();
+
+      if (error) throw error;
+      
+      // If no post found with this slug, or it's the current post being edited, we can use this slug
+      if (!data) {
+        return finalSlug;
+      }
+      
+      // If slug exists, append counter and try again
+      counter++;
+      finalSlug = `${baseSlug}-${counter}`;
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -120,7 +144,7 @@ const AdminDashboard = () => {
     setIsSubmitting(true);
 
     try {
-      const slug = generateSlug(formData.title);
+      const slug = await generateUniqueSlug(formData.title, editingId || undefined);
       let error;
 
       if (editingId) {
