@@ -35,13 +35,13 @@ const AdminDashboard = () => {
   const [tagInput, setTagInput] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showManager, setShowManager] = useState(true);
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   useEffect(() => {
     const handleEditPost = (event: CustomEvent<BlogPost>) => {
       const post = event.detail;
       setFormData(post);
-      setEditingId(post.id ? Number(post.id) : null);
+      setEditingId(post.id || null);
       setShowManager(false);
     };
 
@@ -108,7 +108,7 @@ const AdminDashboard = () => {
     widget.open();
   };
 
-  const generateUniqueSlug = async (title: string, currentId?: number): Promise<string> => {
+  const generateUniqueSlug = async (title: string, currentId?: string): Promise<string> => {
     const baseSlug = title
       .toLowerCase()
       .replace(/[^\w\s-]/g, '')
@@ -123,7 +123,7 @@ const AdminDashboard = () => {
         .from('blog_posts')
         .select('id')
         .eq('slug', finalSlug)
-        .neq('id', currentId || 0)
+        .not('id', 'eq', currentId)
         .maybeSingle();
 
       if (error) throw error;

@@ -33,7 +33,7 @@ const BlogPostManager = () => {
     window.dispatchEvent(new CustomEvent('editBlogPost', { detail: post }));
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     if (!window.confirm('Are you sure you want to delete this post?')) return;
 
     try {
