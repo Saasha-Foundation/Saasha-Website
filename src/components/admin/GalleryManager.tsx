@@ -164,32 +164,52 @@ const GalleryManager: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      if (uploadedImages.length === 0) {
+      if (uploadedImages.length === 0 && !editingId) {
         throw new Error('Please upload at least one image');
       }
 
-      // Ensure at least one image is marked as cover
-      if (!uploadedImages.some(img => img.isCover)) {
+      // Ensure at least one image is marked as cover when creating new images
+      if (!editingId && !uploadedImages.some(img => img.isCover)) {
         throw new Error('Please select a cover image');
       }
 
       if (editingId) {
-        // Update existing image
-        const { error } = await supabase
-          .from('gallery_images')
-          .update({
-            title: formData.title,
-            description: formData.description,
-            image_url: formData.image_url,
-            category: formData.category,
-            published: formData.published,
-            order: formData.order || 0,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', editingId);
+        // Check if we're editing a group image
+        const imageToEdit = images.find(img => img.id === editingId);
+        if (imageToEdit?.group_id) {
+          // Update all images in the group with the same metadata
+          const groupId = imageToEdit.group_id;
+          const { error } = await supabase
+            .from('gallery_images')
+            .update({
+              title: formData.title,
+              description: formData.description,
+              category: formData.category,
+              published: formData.published,
+              updated_at: new Date().toISOString()
+            })
+            .eq('group_id', groupId);
 
-        if (error) throw error;
-        toast.success('Gallery image updated successfully');
+          if (error) throw error;
+          toast.success('Gallery group updated successfully');
+        } else {
+          // Update single image
+          const { error } = await supabase
+            .from('gallery_images')
+            .update({
+              title: formData.title,
+              description: formData.description,
+              image_url: formData.image_url,
+              category: formData.category,
+              published: formData.published,
+              order: formData.order || 0,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', editingId);
+
+          if (error) throw error;
+          toast.success('Gallery image updated successfully');
+        }
       } else {
         // Create new group of images
         const groupId = crypto.randomUUID();
@@ -223,14 +243,21 @@ const GalleryManager: React.FC = () => {
   };
 
   const handleEdit = (image: GalleryImage) => {
+    // If this is a group cover image, we're editing the group properties
+    const isGroupCover = image.group_id && image.is_cover;
+    
     setFormData({
       title: image.title,
       description: image.description,
       image_url: image.image_url,
       category: image.category,
       published: image.published,
-      order: image.order
+      order: image.order,
+      group_id: image.group_id,
+      is_cover: image.is_cover
     });
+    
+    // For group edits, we'll update all images in the group with the same metadata
     setEditingId(image.id);
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -513,7 +540,8 @@ const GalleryManager: React.FC = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {images.map((image) => {
+              {/* Filter to show only standalone images or cover images for groups */}
+              {images.filter(img => !img.group_id || (img.group_id && img.is_cover)).map((image) => {
                 const isGroupCover = image.group_id && image.is_cover;
                 const groupImages = isGroupCover ? images.filter(img => img.group_id === image.group_id) : [];
                 
@@ -548,23 +576,12 @@ const GalleryManager: React.FC = () => {
                       </div>
                       <p className="mt-2 text-sm text-gray-600 dark:text-gray-300 line-clamp-2">{image.description}</p>
                       <div className="mt-4 flex justify-end space-x-2">
-                        {isGroupCover && groupImages.map((groupImage, index) => (
-                          <button
-                            key={groupImage.id}
-                            onClick={() => handleEdit(groupImage)}
-                            className="text-xs px-2 py-1 bg-gray-100 dark:bg-dark-primary text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-dark-primary/80"
-                          >
-                            Edit {index + 1}
-                          </button>
-                        ))}
-                        {!image.group_id && (
-                          <button
-                            onClick={() => handleEdit(image)}
-                            className="text-xs px-2 py-1 bg-gray-100 dark:bg-dark-primary text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-dark-primary/80"
-                          >
-                            Edit
-                          </button>
-                        )}
+                        <button
+                          onClick={() => handleEdit(image)}
+                          className="text-xs px-2 py-1 bg-gray-100 dark:bg-dark-primary text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-dark-primary/80"
+                        >
+                          {isGroupCover ? 'Edit Group' : 'Edit'}
+                        </button>
                         <button
                           onClick={() => handleDelete(isGroupCover ? image.group_id! : image.id)}
                           className="text-xs px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded hover:bg-red-200 dark:hover:bg-red-900/50"
