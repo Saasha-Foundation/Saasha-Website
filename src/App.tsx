@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { DarkModeProvider } from './context/DarkModeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -13,6 +13,7 @@ import Footer from './components/Footer';
 import Donate from './components/Donate';
 import DarkModeToggle from './components/DarkModeToggle';
 import ComingSoon from './components/ComingSoon';
+import MaintenancePage from './components/MaintenancePage';
 import AdminLogin from './components/admin/AdminLogin';
 import AdminDashboard from './components/admin/AdminDashboard';
 import BlogList from './components/blog/BlogList';
@@ -44,6 +45,7 @@ const isAdminRoute = (pathname: string) => {
 
 const MainApp = () => {
   const location = useLocation();
+  const { isMaintenanceMode } = useMaintenance();
   const [hasAccess, setHasAccess] = useState(false);
 
   useEffect(() => {
@@ -61,8 +63,14 @@ const MainApp = () => {
     }
   }, [location.search]);
 
+  // Show coming soon page if user doesn't have access
   if (!hasAccess) {
     return <ComingSoon />;
+  }
+
+  // Show maintenance page if maintenance mode is active and not on admin routes
+  if (isMaintenanceMode && !isAdminRoute(location.pathname)) {
+    return <MaintenancePage />;
   }
 
   return (
@@ -107,16 +115,18 @@ const MainApp = () => {
   );
 };
 
-const App = () => {
+function App() {
   return (
-    <Router>
+    <DarkModeProvider>
       <AuthProvider>
-        <Router>
-          <MainApp />
-        </Router>
+        <MaintenanceProvider>
+          <Router>
+            <MainApp />
+          </Router>
+        </MaintenanceProvider>
       </AuthProvider>
-    </Router>
+    </DarkModeProvider>
   );
-};
+}
 
 export default App;
