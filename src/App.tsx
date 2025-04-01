@@ -23,6 +23,7 @@ import GalleryPage from './components/gallery/GalleryPage';
 import NotFound from './components/NotFound';
 import { Toaster } from 'react-hot-toast';
 
+
 // Protected Route component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated } = useAuth();
