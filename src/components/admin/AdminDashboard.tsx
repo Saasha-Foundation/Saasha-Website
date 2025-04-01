@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { useMaintenance } from '../../context/MaintenanceContext';
 import { supabase } from '../../lib/supabase';
 import RichTextEditor from './RichTextEditor';
 import BlogPostManager from './BlogPostManager';
@@ -24,7 +23,6 @@ const CLOUDINARY_PRESET = 'saasha_blog'; // Create this in your Cloudinary dashb
 
 const AdminDashboard = () => {
   const { logout } = useAuth();
-  const { isMaintenanceMode, toggleMaintenanceMode } = useMaintenance();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'blogs' | 'events' | 'volunteers' | 'faqs' | 'gallery'>('blogs');
   const [formData, setFormData] = useState<BlogPost>({
@@ -228,27 +226,15 @@ const AdminDashboard = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-3xl font-bold text-saasha-brown dark:text-dark-text">Admin Dashboard</h1>
-            <div className="flex space-x-4">
-              <button
-                onClick={toggleMaintenanceMode}
-                className={`px-4 py-2 rounded-md ${
-                  isMaintenanceMode 
-                    ? 'bg-yellow-500 hover:bg-yellow-600' 
-                    : 'bg-green-500 hover:bg-green-600'
-                } text-white`}
-              >
-                {isMaintenanceMode ? 'Disable Maintenance Mode' : 'Enable Maintenance Mode'}
-              </button>
-              <button
-                onClick={() => {
-                  logout();
-                  navigate('/admin');
-                }}
-                className="bg-saasha-brown text-white px-4 py-2 rounded-md hover:bg-saasha-brown/90"
-              >
-                Logout
-              </button>
-            </div>
+            <button
+              onClick={() => {
+                logout();
+                navigate('/admin');
+              }}
+              className="bg-saasha-brown text-white px-4 py-2 rounded-md hover:bg-saasha-brown/90"
+            >
+              Logout
+            </button>
           </div>
 
           {/* Navigation Tabs */}

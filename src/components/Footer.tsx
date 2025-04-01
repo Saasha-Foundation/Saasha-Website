@@ -41,6 +41,15 @@ const Footer = () => {
           </div>
           
           <div className="space-y-4">
+            <h3 className="font-semibold text-xl mb-4">Causes</h3>
+            <ul className="space-y-2">
+              <li><ScrollToTopLink to="/" className="hover:text-saasha-rose dark:hover:text-dark-accent transition-colors duration-300">Education</ScrollToTopLink></li>
+              <li><ScrollToTopLink to="/" className="hover:text-saasha-rose dark:hover:text-dark-accent transition-colors duration-300">Healthcare</ScrollToTopLink></li>
+              <li><ScrollToTopLink to="/" className="hover:text-saasha-rose dark:hover:text-dark-accent transition-colors duration-300">Environment</ScrollToTopLink></li>
+            </ul>
+          </div>
+          
+          <div className="space-y-4">
             <h3 className="font-semibold text-xl mb-4">Events</h3>
             <ul className="space-y-2">
             <li><ScrollToTopLink to="/events" className="hover:text-saasha-rose dark:hover:text-dark-accent transition-colors duration-300">Events</ScrollToTopLink></li>
