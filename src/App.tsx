@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { DarkModeProvider } from './context/DarkModeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { MaintenanceProvider, useMaintenance } from './context/MaintenanceContext';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import About from './components/About';
@@ -12,6 +13,7 @@ import Footer from './components/Footer';
 import Donate from './components/Donate';
 import DarkModeToggle from './components/DarkModeToggle';
 import ComingSoon from './components/ComingSoon';
+import MaintenancePage from './components/MaintenancePage';
 import AdminLogin from './components/admin/AdminLogin';
 import AdminDashboard from './components/admin/AdminDashboard';
 import BlogList from './components/blog/BlogList';
@@ -36,8 +38,14 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   return <>{children}</>;
 };
 
+// Check if current path is admin related
+const isAdminRoute = (pathname: string) => {
+  return pathname.startsWith('/admin');
+};
+
 const MainApp = () => {
   const location = useLocation();
+  const { isMaintenanceMode } = useMaintenance();
   const [hasAccess, setHasAccess] = useState(false);
 
   useEffect(() => {
@@ -55,8 +63,14 @@ const MainApp = () => {
     }
   }, [location.search]);
 
+  // Show coming soon page if user doesn't have access
   if (!hasAccess) {
     return <ComingSoon />;
+  }
+
+  // Show maintenance page if maintenance mode is active and not on admin routes
+  if (isMaintenanceMode && !isAdminRoute(location.pathname)) {
+    return <MaintenancePage />;
   }
 
   return (
@@ -105,9 +119,11 @@ function App() {
   return (
     <DarkModeProvider>
       <AuthProvider>
-        <Router>
-          <MainApp />
-        </Router>
+        <MaintenanceProvider>
+          <Router>
+            <MainApp />
+          </Router>
+        </MaintenanceProvider>
       </AuthProvider>
     </DarkModeProvider>
   );
