@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useMaintenance } from '../../context/MaintenanceContext';
 import { supabase } from '../../lib/supabase';
 import RichTextEditor from './RichTextEditor';
 import BlogPostManager from './BlogPostManager';
@@ -23,8 +24,9 @@ const CLOUDINARY_PRESET = 'saasha_blog'; // Create this in your Cloudinary dashb
 
 const AdminDashboard = () => {
   const { logout } = useAuth();
+  const { isMaintenanceMode, toggleMaintenanceMode, isLoading: maintenanceLoading } = useMaintenance();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'blogs' | 'events' | 'volunteers' | 'faqs' | 'gallery'>('blogs');
+  const [activeTab, setActiveTab] = useState<'blogs' | 'events' | 'volunteers' | 'faqs' | 'gallery' | 'settings'>('blogs');
   const [formData, setFormData] = useState<BlogPost>({
     title: '',
     content: '',
@@ -289,6 +291,16 @@ const AdminDashboard = () => {
             >
               Gallery
             </button>
+            <button
+              onClick={() => setActiveTab('settings')}
+              className={`px-4 py-2 -mb-px text-sm font-medium ${
+                activeTab === 'settings'
+                  ? 'border-b-2 border-saasha-rose text-saasha-rose'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+              }`}
+            >
+              Settings
+            </button>
           </div>
 
           {/* Content Area */}
@@ -446,6 +458,49 @@ const AdminDashboard = () => {
             {activeTab === 'volunteers' && <VolunteerManager />}
             {activeTab === 'faqs' && <FAQManager />}
             {activeTab === 'gallery' && <GalleryManager />}
+            {activeTab === 'settings' && (
+              <div className="space-y-8">
+                <div>
+                  <h2 className="text-2xl font-bold text-saasha-brown dark:text-dark-text mb-6">
+                    Site Settings
+                  </h2>
+                  
+                  <div className="bg-gray-50 dark:bg-dark-secondary/50 p-6 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-lg font-medium text-saasha-brown dark:text-dark-text">
+                          Maintenance Mode
+                        </h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                          When enabled, visitors will see a maintenance page instead of the website. Admin dashboard will remain accessible.
+                        </p>
+                      </div>
+                      <div className="flex items-center">
+                        <button
+                          onClick={toggleMaintenanceMode}
+                          disabled={maintenanceLoading}
+                          className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-saasha-rose focus:ring-offset-2 ${
+                            isMaintenanceMode ? 'bg-saasha-rose' : 'bg-gray-300 dark:bg-gray-600'
+                          } ${maintenanceLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                          role="switch"
+                          aria-checked={isMaintenanceMode}
+                        >
+                          <span
+                            aria-hidden="true"
+                            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                              isMaintenanceMode ? 'translate-x-5' : 'translate-x-0'
+                            }`}
+                          />
+                        </button>
+                        <span className="ml-3 text-sm font-medium text-saasha-brown dark:text-dark-text">
+                          {maintenanceLoading ? 'Updating...' : isMaintenanceMode ? 'Enabled' : 'Disabled'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
