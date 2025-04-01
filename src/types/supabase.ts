@@ -154,6 +154,30 @@ export interface Database {
         };
         Relationships: [];
       };
+      site_settings: {
+        Row: {
+          id: string;
+          key: string;
+          value: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          key: string;
+          value: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          key?: string;
+          value?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       volunteer_registrations: {
         Row: {
           id: string;

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
+import toast from 'react-hot-toast';
 
 interface MaintenanceContextType {
   isMaintenanceMode: boolean;
@@ -19,19 +20,24 @@ export const MaintenanceProvider: React.FC<{ children: React.ReactNode }> = ({ c
   useEffect(() => {
     const fetchMaintenanceStatus = async () => {
       try {
+        // First check if the site_settings table exists
         const { data, error } = await supabase
           .from('site_settings')
           .select('value')
           .eq('key', 'maintenance_mode')
-          .single();
+          .maybeSingle();
 
-        if (error) throw error;
-        
-        // If the setting exists, use it; otherwise default to false
-        setIsMaintenanceMode(data?.value === 'true');
+        if (error) {
+          console.error('Error fetching maintenance mode:', error);
+          // Default to false if there's an error
+          setIsMaintenanceMode(false);
+        } else {
+          // If the setting exists, use it; otherwise default to false
+          setIsMaintenanceMode(data?.value === 'true');
+          console.log('Maintenance mode status:', data?.value === 'true');
+        }
       } catch (err: any) {
-        console.error('Error fetching maintenance mode status:', err);
-        // If the table or row doesn't exist yet, we'll create it when toggling
+        console.error('Error in fetchMaintenanceStatus:', err);
         setError(null);
       } finally {
         setIsLoading(false);
@@ -47,24 +53,49 @@ export const MaintenanceProvider: React.FC<{ children: React.ReactNode }> = ({ c
       setError(null);
       
       const newValue = !isMaintenanceMode;
+      console.log('Toggling maintenance mode to:', newValue);
       
-      // Update or insert the maintenance mode setting
-      const { error } = await supabase
+      // Check if the setting already exists
+      const { data: existingData } = await supabase
         .from('site_settings')
-        .upsert({ 
-          key: 'maintenance_mode', 
-          value: newValue.toString(),
-          updated_at: new Date().toISOString()
-        }, { 
-          onConflict: 'key' 
-        });
-
-      if (error) throw error;
+        .select('id')
+        .eq('key', 'maintenance_mode')
+        .maybeSingle();
       
+      let result;
+      
+      if (existingData?.id) {
+        // Update existing setting
+        result = await supabase
+          .from('site_settings')
+          .update({ 
+            value: newValue.toString(),
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', existingData.id);
+      } else {
+        // Insert new setting
+        result = await supabase
+          .from('site_settings')
+          .insert({ 
+            key: 'maintenance_mode', 
+            value: newValue.toString(),
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          });
+      }
+      
+      if (result.error) {
+        throw result.error;
+      }
+      
+      // Update local state
       setIsMaintenanceMode(newValue);
+      toast.success(`Maintenance mode ${newValue ? 'enabled' : 'disabled'}`);
     } catch (err: any) {
       console.error('Error toggling maintenance mode:', err);
       setError(err.message || 'Failed to toggle maintenance mode');
+      toast.error('Failed to toggle maintenance mode');
     } finally {
       setIsLoading(false);
     }
