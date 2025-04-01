@@ -6,8 +6,8 @@ const Hero = () => {
     <div className="relative bg-saasha-cream dark:bg-dark-primary min-h-screen flex items-center">
       <div className="absolute inset-0">
         <img
-          src="https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&q=80"
-          alt="People helping people"
+          src="https://i.imgur.com/495jfJc.jpeg"
+          alt="Good old saasha"
           className="w-full h-full object-cover opacity-20 dark:opacity-10"
         />
       </div>
@@ -21,8 +21,8 @@ const Hero = () => {
             Together, we can create lasting change in our communities. Join us in our mission to build a better future for everyone.
           </p>
           <div className="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
-            <div className="mt-3 rounded-md shadow sm:mt-0 sm:ml-3">
-              <Link to="/volunteer" className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-saasha-brown dark:text-dark-text bg-white dark:bg-dark-secondary hover:bg-saasha-cream dark:hover:bg-dark-accent/20 transition-colors duration-300 md:py-4 md:text-lg md:px-10">
+            <div className="rounded-md shadow">
+              <Link to="/volunteer" className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-saasha-cream bg-saasha-brown hover:bg-saasha-rose dark:bg-dark-accent dark:hover:bg-saasha-rose transition-colors duration-300 md:py-4 md:text-lg md:px-10">
                 Volunteer
               </Link>
             </div>
