@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { DarkModeProvider } from './context/DarkModeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -11,7 +11,6 @@ import Team from './components/Team';
 import Footer from './components/Footer';
 import Donate from './components/Donate';
 import DarkModeToggle from './components/DarkModeToggle';
-import ComingSoon from './components/ComingSoon';
 import AdminLogin from './components/admin/AdminLogin';
 import AdminDashboard from './components/admin/AdminDashboard';
 import BlogList from './components/blog/BlogList';
@@ -37,28 +36,6 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 };
 
 const MainApp = () => {
-  const location = useLocation();
-  const [hasAccess, setHasAccess] = useState(false);
-
-  useEffect(() => {
-    // Check if user already has access
-    const storedAccess = localStorage.getItem('hasDevAccess');
-    
-    // If ?developer is in URL, grant access
-    if (location.search.includes('?dev')) {
-      localStorage.setItem('hasDevAccess', 'true');
-      setHasAccess(true);
-    } 
-    // If access was previously granted, maintain it
-    else if (storedAccess === 'true') {
-      setHasAccess(true);
-    }
-  }, [location.search]);
-
-  if (!hasAccess) {
-    return <ComingSoon />;
-  }
-
   return (
     <div className="min-h-screen bg-saasha-cream dark:bg-dark-primary dark:text-dark-text transition-colors duration-200">
       <Toaster position="top-right" />
@@ -101,16 +78,16 @@ const MainApp = () => {
   );
 };
 
-function App() {
+const App = () => {
   return (
-    <DarkModeProvider>
+    <Router>
       <AuthProvider>
-        <Router>
+        <DarkModeProvider>
           <MainApp />
-        </Router>
+        </DarkModeProvider>
       </AuthProvider>
-    </DarkModeProvider>
+    </Router>
   );
-}
+};
 
 export default App;
