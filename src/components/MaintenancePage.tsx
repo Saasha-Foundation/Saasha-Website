@@ -9,7 +9,6 @@ const MaintenancePage: React.FC = () => {
             saasha
           </h1>
         </div>
-        
         <h2 className="text-3xl font-bold text-saasha-brown dark:text-dark-text mb-4">
           We're Under Maintenance
         </h2>

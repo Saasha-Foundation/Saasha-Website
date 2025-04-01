@@ -6,6 +6,7 @@ interface MaintenanceContextType {
   isMaintenanceMode: boolean;
   toggleMaintenanceMode: () => Promise<void>;
   isLoading: boolean;
+  isInitialized: boolean;
   error: string | null;
 }
 
@@ -14,6 +15,7 @@ const MaintenanceContext = createContext<MaintenanceContextType | undefined>(und
 export const MaintenanceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isMaintenanceMode, setIsMaintenanceMode] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Fetch the maintenance mode status from Supabase on initial load
@@ -41,6 +43,7 @@ export const MaintenanceProvider: React.FC<{ children: React.ReactNode }> = ({ c
         setError(null);
       } finally {
         setIsLoading(false);
+        setIsInitialized(true);
       }
     };
 
@@ -102,7 +105,7 @@ export const MaintenanceProvider: React.FC<{ children: React.ReactNode }> = ({ c
   };
 
   return (
-    <MaintenanceContext.Provider value={{ isMaintenanceMode, toggleMaintenanceMode, isLoading, error }}>
+    <MaintenanceContext.Provider value={{ isMaintenanceMode, toggleMaintenanceMode, isLoading, isInitialized, error }}>
       {children}
     </MaintenanceContext.Provider>
   );

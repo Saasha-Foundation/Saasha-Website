@@ -39,9 +39,20 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
 // Maintenance Mode component
 const MaintenanceWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isMaintenanceMode } = useMaintenance();
+  const { isMaintenanceMode, isInitialized } = useMaintenance();
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
+
+  // Show loading state until maintenance status is initialized
+  if (!isInitialized) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-saasha-cream dark:bg-dark-primary">
+        <div className="animate-pulse text-saasha-brown dark:text-dark-text text-xl">
+          Loading...
+        </div>
+      </div>
+    );
+  }
 
   // Always show admin routes, show maintenance page for all other routes when in maintenance mode
   if (isMaintenanceMode && !isAdminRoute) {
@@ -52,45 +63,51 @@ const MaintenanceWrapper: React.FC<{ children: React.ReactNode }> = ({ children 
 };
 
 const MainApp = () => {
+  const { isInitialized } = useMaintenance();
+
   return (
     <div className="min-h-screen bg-saasha-cream dark:bg-dark-primary dark:text-dark-text transition-colors duration-200">
       <Toaster position="top-right" />
       <MaintenanceWrapper>
-        <Navbar />
-        <Routes>
-          <Route path="/" element={
-            <>
-              <Hero />
-              <About />
-              <WhySupport />
-            </>
-          } />
-          <Route path="/about" element={<About />} />
-          <Route path="/team" element={<Team />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/volunteer" element={<VolunteerPage />} />
-          <Route path="/events" element={<EventsPage />} />
-          <Route path="/event/:id" element={<EventPage />} />
-          <Route path="/donate" element={<Donate />} />
-          <Route path="/whysupport" element={<WhySupport />} />
-          <Route path="/blogs" element={<BlogList />} />
-          <Route path="/blog" element={<Navigate to="/blogs" replace />} />
-          <Route path="/blog/:slug" element={<BlogPost />} />
-          <Route path="/faqs" element={<FAQPage />} />
-          <Route path="/gallery" element={<GalleryPage />} />
-          <Route path="/admin" element={<AdminLogin />} />
-          <Route
-            path="/admin/dashboard"
-            element={
-              <ProtectedRoute>
-                <AdminDashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <Footer />
-        <DarkModeToggle />
+        {isInitialized && (
+          <>
+            <Navbar />
+            <Routes>
+              <Route path="/" element={
+                <>
+                  <Hero />
+                  <About />
+                  <WhySupport />
+                </>
+              } />
+              <Route path="/about" element={<About />} />
+              <Route path="/team" element={<Team />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/volunteer" element={<VolunteerPage />} />
+              <Route path="/events" element={<EventsPage />} />
+              <Route path="/event/:id" element={<EventPage />} />
+              <Route path="/donate" element={<Donate />} />
+              <Route path="/whysupport" element={<WhySupport />} />
+              <Route path="/blogs" element={<BlogList />} />
+              <Route path="/blog" element={<Navigate to="/blogs" replace />} />
+              <Route path="/blog/:slug" element={<BlogPost />} />
+              <Route path="/faqs" element={<FAQPage />} />
+              <Route path="/gallery" element={<GalleryPage />} />
+              <Route path="/admin" element={<AdminLogin />} />
+              <Route
+                path="/admin/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+            <Footer />
+            <DarkModeToggle />
+          </>
+        )}
       </MaintenanceWrapper>
     </div>
   );
